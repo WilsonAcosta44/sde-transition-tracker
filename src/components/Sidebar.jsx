@@ -1,6 +1,5 @@
 import ProgressBar from './ProgressBar';
 
-// One colour per phase — intentionally distinct
 const PHASE_COLORS = ['#58a6ff', '#bc8cff', '#3fb950', '#e3b341', '#f78166'];
 
 export default function Sidebar({
@@ -14,6 +13,8 @@ export default function Sidebar({
   onReset,
   onExport,
   onImport,
+  user,
+  onSignOut,
 }) {
   return (
     <aside className="sidebar">
@@ -38,8 +39,8 @@ export default function Sidebar({
       {/* ── Phase list ── */}
       <nav className="sidebar-nav" aria-label="Phases">
         {phases.map((phase, i) => {
-          const stats = phaseStats[i];
-          const color = PHASE_COLORS[i];
+          const stats    = phaseStats[i];
+          const color    = PHASE_COLORS[i];
           const isActive = phase.id === activePhaseId;
 
           return (
@@ -53,9 +54,7 @@ export default function Sidebar({
                 <span className="sidebar-phase-num" style={{ color }}>
                   Phase {phase.number}
                 </span>
-                <span className="sidebar-phase-count">
-                  {stats.done}/{stats.total}
-                </span>
+                <span className="sidebar-phase-count">{stats.done}/{stats.total}</span>
               </div>
               <div className="sidebar-phase-title">{phase.title}</div>
               <ProgressBar pct={stats.pct} color={color} height={3} />
@@ -65,7 +64,7 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* ── Footer ── */}
+      {/* ── Footer actions ── */}
       <div className="sidebar-footer">
         <div className="sidebar-footer-actions">
           <button className="footer-btn export-btn" onClick={onExport} title="Export progress to JSON">
@@ -79,6 +78,26 @@ export default function Sidebar({
           Reset all progress
         </button>
       </div>
+
+      {/* ── Signed-in user ── */}
+      {user && (
+        <div className="sidebar-user">
+          {user.photoURL && (
+            <img
+              src={user.photoURL}
+              alt=""
+              className="sidebar-avatar"
+              referrerPolicy="no-referrer"
+            />
+          )}
+          <span className="sidebar-user-name" title={user.email}>
+            {user.displayName || user.email}
+          </span>
+          <button className="sidebar-signout-btn" onClick={onSignOut}>
+            Sign out
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react';
 import PLAN from './data/plan';
+import { useAuth }     from './hooks/useAuth';
 import { useProgress } from './hooks/useProgress';
-import { useNotes } from './hooks/useNotes';
-import Sidebar from './components/Sidebar';
-import PhaseView from './components/PhaseView';
+import { useNotes }    from './hooks/useNotes';
+import Sidebar         from './components/Sidebar';
+import PhaseView       from './components/PhaseView';
+import LoginScreen     from './components/LoginScreen';
 
-// Compute completed / total counts for each phase
 function buildPhaseStats(phases, completed) {
   return phases.map((phase) => {
     const allTasks = phase.weeks.flatMap((w) => w.tasks);
@@ -16,11 +17,26 @@ function buildPhaseStats(phases, completed) {
 }
 
 export default function App() {
-  const [activePhaseId, setActivePhaseId] = useState('phase-1');
-  const { completed, toggle, reset, importProgress } = useProgress();
-  const { notes, setNote, importNotes } = useNotes();
+  const { user, loading, signIn, signOut } = useAuth();
+  const [activePhaseId, setActivePhaseId]  = useState('phase-1');
+  const { completed, toggle, reset, importProgress } = useProgress(user?.uid);
+  const { notes, setNote, importNotes }              = useNotes(user?.uid);
   const fileInputRef = useRef(null);
 
+  // ── Auth states ──────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="app-loading" aria-label="Loading">
+        <span className="app-loading-icon">⚡</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginScreen onSignIn={signIn} />;
+  }
+
+  // ── Signed in ────────────────────────────────────────────────────────────
   const handleExport = () => {
     const data = {
       exportedAt: new Date().toISOString(),
@@ -46,20 +62,17 @@ export default function App() {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (!data.progress && !data.notes) {
-          alert('Invalid backup file.');
-          return;
-        }
+        if (!data.progress && !data.notes) { alert('Invalid backup file.'); return; }
         if (window.confirm('Replace your current progress and notes with this backup?')) {
           if (data.progress) importProgress(data.progress);
           if (data.notes)    importNotes(data.notes);
         }
       } catch {
-        alert('Could not read file. Make sure it\'s a valid SDE Tracker backup.');
+        alert("Could not read file. Make sure it's a valid SDE Tracker backup.");
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // allow re-importing same file
+    e.target.value = '';
   };
 
   const phaseStats  = buildPhaseStats(PLAN.phases, completed);
@@ -71,7 +84,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* hidden file input for import */}
       <input
         ref={fileInputRef}
         type="file"
@@ -90,6 +102,8 @@ export default function App() {
         onReset={reset}
         onExport={handleExport}
         onImport={() => fileInputRef.current.click()}
+        user={user}
+        onSignOut={signOut}
       />
       <main className="main">
         {activePhase && (

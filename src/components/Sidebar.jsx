@@ -11,8 +11,6 @@ export default function Sidebar({
   activePhaseId,
   onSelectPhase,
   onReset,
-  onExport,
-  onImport,
   user,
   onSignOut,
   isOpen,
@@ -78,14 +76,6 @@ export default function Sidebar({
 
       {/* ── Footer actions ── */}
       <div className="sidebar-footer">
-        <div className="sidebar-footer-actions">
-          <button className="footer-btn export-btn" onClick={onExport} title="Export progress to JSON">
-            ↓ Export
-          </button>
-          <button className="footer-btn import-btn" onClick={onImport} title="Import progress from JSON">
-            ↑ Import
-          </button>
-        </div>
         <button className="reset-btn" onClick={onReset} title="Reset all progress">
           Reset all progress
         </button>

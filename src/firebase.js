@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey:            'AIzaSyDiuY3OZ-t4RMYgFGUMjF-SQOoLs3kRPyY',
-  authDomain:        'sde-transition-tracker.firebaseapp.com',
-  projectId:         'sde-transition-tracker',
-  storageBucket:     'sde-transition-tracker.firebasestorage.app',
-  messagingSenderId: '1093287182988',
-  appId:             '1:1093287182988:web:821b1adf39d0622f7471a9',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

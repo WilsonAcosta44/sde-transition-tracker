@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PLAN from './data/plan';
 import { useAuth }     from './hooks/useAuth';
 import { useProgress } from './hooks/useProgress';
@@ -19,9 +19,16 @@ function buildPhaseStats(phases, completed) {
 export default function App() {
   const { user, loading, signIn, signOut } = useAuth();
   const [activePhaseId, setActivePhaseId]  = useState('phase-1');
+  const [sidebarOpen, setSidebarOpen]      = useState(false);
   const { completed, toggle, reset, importProgress } = useProgress(user?.uid);
   const { notes, setNote, importNotes }              = useNotes(user?.uid);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (sidebarOpen) document.body.style.overflow = 'hidden';
+    else             document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
 
   // ── Auth states ──────────────────────────────────────────────────────────
   if (loading) {
@@ -91,6 +98,11 @@ export default function App() {
         style={{ display: 'none' }}
         onChange={handleImportFile}
       />
+
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
+
       <Sidebar
         phases={PLAN.phases}
         phaseStats={phaseStats}
@@ -104,8 +116,27 @@ export default function App() {
         onImport={() => fileInputRef.current.click()}
         user={user}
         onSignOut={signOut}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
+
       <main className="main">
+        <header className="mobile-header">
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+              <rect width="18" height="2" rx="1" fill="currentColor"/>
+              <rect y="6" width="18" height="2" rx="1" fill="currentColor"/>
+              <rect y="12" width="18" height="2" rx="1" fill="currentColor"/>
+            </svg>
+          </button>
+          <span className="mobile-header-title">⚡ SDE Tracker</span>
+          <span className="mobile-header-pct">{totalPct}%</span>
+        </header>
+
         {activePhase && (
           <PhaseView
             phase={activePhase}

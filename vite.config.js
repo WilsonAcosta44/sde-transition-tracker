@@ -35,6 +35,8 @@ export default defineConfig({
       // Cache all JS, CSS, HTML, and the icon
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg}'],
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],
